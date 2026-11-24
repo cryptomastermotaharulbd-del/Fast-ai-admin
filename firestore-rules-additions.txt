@@ -1,0 +1,55 @@
+// ============================================================
+// Fast AI — Firestore rules ADDITIONS for the web admin panel
+//
+// Merge these blocks into the project's existing firestore.rules
+// (Firebase Console → Firestore Database → Rules), inside
+// match /databases/{database}/documents { ... }, then Publish.
+//
+// Admin email is set to the owner email below — the SAME email
+// set as ADMIN_EMAIL in app.js.
+// ============================================================
+
+// Helper: is the signed-in user the admin (owner)?
+// (Place this function inside the `match /databases/{database}/documents`
+// block, alongside the matches below.)
+function isAdmin() {
+  return request.auth != null && request.auth.token.email == "motaharulm49@gmail.com";
+}
+
+// --- Admin can read the user list and update ban status -------------------
+// Add these two matches NEXT TO the existing /users/{userId} matches.
+// (Rules are OR-ed: the existing owner-only rule stays in force; these add
+// the admin's read access and a narrow write for the `banned` field only.)
+match /users/{userId} {
+  allow read: if isAdmin();
+  // Admin may ONLY flip the banned flag — nothing else on the profile.
+  allow update: if isAdmin()
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['banned']);
+}
+
+// --- Admin reads users' API-key STATUS (metadata only, never keys) --------
+// The whitelist below is the enforcement point: a keyStatus document may
+// contain ONLY these fields. Any document carrying an `apiKey` (or any
+// other extra field) is rejected on write, so a full key can never be
+// stored here — by the app, by the panel, or by anyone else.
+match /users/{userId}/keyStatus/{providerId} {
+  allow read: if isAdmin()
+    || (request.auth != null && request.auth.uid == userId);
+  allow create, update: if request.auth != null
+    && request.auth.uid == userId
+    && request.resource.data.keys().hasOnly(
+         ['provider', 'hasKey', 'maskedSuffix', 'keyAddedAt', 'keyUpdatedAt'])
+    && request.resource.data.provider is string
+    && request.resource.data.hasKey is bool
+    && request.resource.data.maskedSuffix is string
+    && request.resource.data.maskedSuffix.size() <= 4;
+  allow delete: if request.auth != null && request.auth.uid == userId;
+}
+
+// --- Remote config: announcement + feature flags ---------------------------
+// Any signed-in app user may READ the config (the app needs it); ONLY the
+// admin may write it.
+match /config/{docId} {
+  allow read: if request.auth != null;
+  allow write: if isAdmin();
+}

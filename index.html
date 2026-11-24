@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fast AI — Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">⚡ Fast AI <span>Admin Panel</span></div>
+    <div id="session-bar" class="session-bar hidden">
+      <span id="admin-email"></span>
+      <button id="logout-btn" class="btn btn-ghost">Log out</button>
+    </div>
+  </header>
+
+  <!-- Login -->
+  <main id="login-view" class="card login-card">
+    <h1>Admin login</h1>
+    <p class="muted">Only the owner account can access this panel.</p>
+    <form id="login-form">
+      <label>Email
+        <input type="email" id="login-email" required autocomplete="username">
+      </label>
+      <label>Password
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </label>
+      <button type="submit" class="btn btn-primary">Log in</button>
+      <p id="login-error" class="error"></p>
+    </form>
+  </main>
+
+  <!-- Panel -->
+  <main id="panel-view" class="hidden">
+    <nav class="tabs">
+      <button class="tab active" data-tab="users">Users</button>
+      <button class="tab" data-tab="announcement">Announcement</button>
+      <button class="tab" data-tab="features">Feature Flags</button>
+      <button class="tab" data-tab="keys">API Key Status</button>
+    </nav>
+
+    <!-- Users -->
+    <section id="tab-users" class="card">
+      <div class="row-between">
+        <h2>Users</h2>
+        <button id="refresh-users" class="btn btn-ghost">Refresh</button>
+      </div>
+      <p id="users-status" class="muted"></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Plan</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="users-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Announcement -->
+    <section id="tab-announcement" class="card hidden">
+      <h2>Announcement</h2>
+      <p class="muted">Shown as a banner on the app's Home and Chat screens when active.</p>
+      <label class="switch-row">
+        <input type="checkbox" id="ann-active"> Active
+      </label>
+      <label>Title
+        <input type="text" id="ann-title" placeholder="e.g. New update!">
+      </label>
+      <label>Message
+        <textarea id="ann-message" rows="3" placeholder="Write the announcement…"></textarea>
+      </label>
+      <button id="ann-save" class="btn btn-primary">Save announcement</button>
+      <p id="ann-status" class="muted"></p>
+    </section>
+
+    <!-- Feature flags -->
+    <section id="tab-features" class="card hidden">
+      <h2>Feature Flags</h2>
+      <p class="muted">Turn app features on or off live — no new APK needed.</p>
+      <label class="switch-row">
+        <input type="checkbox" id="flag-website-builder"> Website Builder
+      </label>
+      <label class="switch-row">
+        <input type="checkbox" id="flag-floating-avatar"> Floating Avatar + Background Voice
+      </label>
+      <button id="flags-save" class="btn btn-primary">Save flags</button>
+      <p id="flags-status" class="muted"></p>
+    </section>
+
+    <!-- API key status -->
+    <section id="tab-keys" class="card hidden">
+      <h2>API Key Status</h2>
+      <p class="muted">
+        Which providers each user has configured with their own key.
+        Full keys never leave the user's phone — this panel can only ever
+        show the provider and a masked suffix.
+      </p>
+      <label>Select user
+        <select id="key-user-select"></select>
+      </label>
+      <button id="keys-load" class="btn btn-ghost">Load key status</button>
+      <p id="keys-status" class="muted"></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Provider</th><th>Configured</th><th>Key (masked)</th><th>Added</th><th>Updated</th></tr>
+          </thead>
+          <tbody id="keys-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
